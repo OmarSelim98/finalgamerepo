@@ -40,6 +40,7 @@ public class ChoosePlayerMenu extends GameMenu{
     Label Easy = new Label("Easy");
     Label Medium = new Label(" Medium");
     Label Hard = new Label ("Hard");
+    Label guide = new Label("Choose your character by pressing on \nthe Image  and choose difficulty");
     HBox Diffculties;
 
 
@@ -69,18 +70,23 @@ public class ChoosePlayerMenu extends GameMenu{
         InvisibleButtons.setLayoutY(300);
         InvisibleButtons.setOpacity(0);
 
+        guide.setAlignment(Pos.CENTER);
+        guide.setLayoutX(200);
+        guide.setLayoutY(600);
 
         Images = new VBox(50,player);
         Images.setAlignment(Pos.TOP_CENTER);
         Images.setLayoutX(1000/2-302/2+100);
-        Images.setLayoutY(300);
+        Images.setLayoutY(250);
         Diffculties= new HBox(Easy,Medium,Hard);
         Easy.setFont(Font.font("Courier New",30));
         Medium.setFont(Font.font("Courier New",30));
         Hard.setFont(Font.font("Courier New",30));
+        guide.setFont(Font.font("Courier New",30));
         Easy.setTextFill(Color.WHITE);
         Medium.setTextFill(Color.WHITE);
         Hard.setTextFill(Color.WHITE);
+        guide.setTextFill(Color.GREEN);
         Diffculties.setLayoutX(1000/2-Hard.getWidth()/2-175);
         Diffculties.setLayoutY(Images.getLayoutY()+rick.getHeight()+60);
         Diffculties.setSpacing(30);
@@ -90,6 +96,7 @@ public class ChoosePlayerMenu extends GameMenu{
         Easy.setEffect(glow);
         Medium.setEffect(glow);
         Hard.setEffect(glow);
+        guide.setEffect(glow);
 
 
         Button EasyButton = new Button();
@@ -176,7 +183,7 @@ public class ChoosePlayerMenu extends GameMenu{
 
 
 
-        this.root.getChildren().addAll(BackgroundImage,Images,InvisibleButtons,Diffculties,InvisibleDiffs);
+        this.root.getChildren().addAll(BackgroundImage,guide,Images,InvisibleButtons,Diffculties,InvisibleDiffs);
 
         region.setOnMouseClicked(event -> {
             if(player.getImage()==rick){

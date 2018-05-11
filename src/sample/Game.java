@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -293,28 +294,6 @@ public class Game{
                     }
                 }
 
-/*                    for(Ball ball : ballsList){
-                      if(ball!= null){
-                          if(ball.ballBody.isActive())
-                                ball.update();
-                          else{
-                              root.getChildren().removeAll(ball.imgView);
-                              world.destroyBody(ball.ballBody);
-                          }
-                      }
-                    }*/
-/*                for (Ball ball:
-                        ballsList) {
-                        ball.ballFixture.filter.groupIndex=-7;
-                    ball.ballFixture.filter.categoryBits=0x004;
-                    ball.ballFixture.isSensor =true;
-
-                    }*/
-
-/*                    if(player1.playerBody.getContactList().other.m_fixtureList.m_isSensor){
-                        System.out.println("player2 touched a ball");
-                    }*/
-
 
                 if (player1 != null) {
                     player1.update();
@@ -369,11 +348,13 @@ public class Game{
         gc.fillRect(wallX, wallY, wallW, wallH);
         gc.setStroke(Color.RED);
 
-        gc.fillText("Current Turn " +String.valueOf(currentTurn),50,50);
+        gc.setFill(Color.WHITE);
+        Glow glow = new Glow();
+        //gc.fillText("Current Turn " +String.valueOf(currentTurn),50,50);
         gc.fillText("Player 1 Balls  " + String.valueOf(player1Balls),50,70);
-        gc.fillText("Player 2 Balls " +String.valueOf(player2Balls),50,90);
-        gc.fillText("Player 1 Moves " +String.valueOf(player1Moves),200,70);
-        gc.fillText("Player 2 Moves " +String.valueOf(player2Moves),200,90);
+        gc.fillText("Player 2 Balls " +String.valueOf(player2Balls),850,70);
+        gc.fillText("Player 1 Moves " +String.valueOf(player1Moves),50,90);
+        gc.fillText("Player 2 Moves " +String.valueOf(player2Moves),850,90);
     }
 
     //Action Listeners
