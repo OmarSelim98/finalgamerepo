@@ -22,10 +22,10 @@ import java.util.TimerTask;
 
 public class Game{
 
-    public static final int MOVE_AMOUNT = 100;
+    public static final int MOVE_AMOUNT = 100
+            ,meterToPixel = 30;
 
-    private final int meterToPixel = 30
-            ,wallX = 0
+    private final int wallX = 0
             ,wallY = 600
             ,wallW = 1000
             ,wallH = 400;
@@ -63,6 +63,7 @@ public class Game{
     public Player player1,player2;
     public Healthbar healthbar1;
     public Healthbar healthbar2;
+    Obstacle obst;
     //ArrayList<Ball> ballsList;
     Ball ball;
 
@@ -136,6 +137,11 @@ public class Game{
         new Wall(world,(1001/meterToPixel),(0/meterToPixel));// Right WALL
         new Wall(world,(300/meterToPixel),(0/meterToPixel));// Movement Boundary WALL left
         new Wall(world,(600/meterToPixel),(0/meterToPixel));// Movement Boundary WALL Right
+
+
+        /*Obstacle*/
+        obst = new Obstacle(world,400,250);
+        root.getChildren().add(obst.getObstacleImageView());
 
         //player1.playerFixtureDef.filter.groupIndex=7;
         //System.out.println(player1.playerFixtureDef.filter.groupIndex);
@@ -227,6 +233,7 @@ public class Game{
 
                 planet1.setTranslateX(100+(Math.sin(planetsAnimationAngle)*25));
                 planet2.setTranslateX(670-(Math.sin(planetsAnimationAngle)*25));
+                obst.updateObstacle();
 /*                    for(Ball ball : ballsList){
                       if(ball!= null){
                           if(ball.ballBody.isActive())
@@ -260,6 +267,7 @@ public class Game{
                     player2.update();
                     player2.update_arm();
                 }
+
 
                    // System.out.println(sceneAngle);
             }
