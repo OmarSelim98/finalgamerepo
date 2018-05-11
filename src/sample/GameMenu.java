@@ -70,7 +70,9 @@ public class GameMenu {
         singlePlayer.setOnMouseClicked(event -> {
             Main.ChangeScene(new ChoosePlayerMenu().getScene());
         });
-
+        highScores.setOnMouseClicked(e->{
+            Main.ChangeScene(new Highscores().getScene());
+        });
       multiPlayer.setOnMouseClicked(e->{
 
          Main.ChangeScene(new MultiPlayerGame().getScene());
@@ -83,7 +85,6 @@ public class GameMenu {
         Images.setLayoutY(300);
 
         this.root.getChildren().addAll(BackgroundImage,Images,InvisibleButtons);
-
 
 
     }

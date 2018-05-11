@@ -16,6 +16,8 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
@@ -237,6 +239,18 @@ public class Game{
                         timerCounter = 30;
                         animTimer.stop();
                         Main.ChangeScene(new GameMenu().getScene(),"Morty");
+
+                        try
+                        {
+                            String filename= "MyFile.txt";
+                            FileWriter fw = new FileWriter(filename,true); //the true will append the new data
+                            fw.write(score+"\n");//appends the string to the file
+                            fw.close();
+                        }
+                        catch(IOException ioe)
+                        {
+                            System.err.println("IOException: " + ioe.getMessage());
+                        }
 
                     }else if((System.nanoTime() - lastTime) >= 1000000000) {
                         timerCounter--;
