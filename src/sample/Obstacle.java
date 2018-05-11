@@ -20,10 +20,13 @@ public class Obstacle {
     private float height = 110;
     private float offsetX = width/2;
     private float offsetY = height/2;
-    public Obstacle(World world, float posX, float posY){
+    private int vel;
+
+    public Obstacle(World world, float posX, float posY, int vel){
         this.world = world;
         this.x = posX;
         this.y = posY;
+        this.vel = vel;
         this.obsBodyDef = new BodyDef();
         this.obsBodyDef.position.set(((posX+this.offsetX)/Game.meterToPixel),-((posY+this.offsetY)/Game.meterToPixel));
         this.obsBodyDef.type = BodyType.KINEMATIC;
@@ -33,13 +36,14 @@ public class Obstacle {
         this.obsFixture = new FixtureDef();
         this.obsFixture.shape = this.obsShape;
         this.obsFixture.filter.categoryBits = 0x0005;
+        this.obsFixture.userData = this;
         this.obsBody.createFixture(this.obsFixture);
 
         this.obsImg = new ImageView(new Image("gameres/pickle.png",this.width,this.height,false,false));
         this.obsImg.setTranslateX(this.x);
         this.obsImg.setTranslateY(this.y);
 
-        this.obsBody.setLinearVelocity(new Vec2(0,-3));
+        this.obsBody.setLinearVelocity(new Vec2(0,-vel));
     }
 
     public ImageView getObstacleImageView(){
@@ -48,10 +52,21 @@ public class Obstacle {
     public void updateObstacle(){
         this.obsImg.setTranslateX((this.obsBody.getPosition().x*Game.meterToPixel)-this.offsetX);
         this.obsImg.setTranslateY(-(this.obsBody.getPosition().y*Game.meterToPixel)-this.offsetY);
-        if(-(this.obsBody.getPosition().y*Game.meterToPixel) >= 700){
-            this.obsBody.setLinearVelocity(new Vec2(0,3));
+        if(-(this.obsBody.getPosition().y*Game.meterToPixel) >= 600){
+            this.obsBody.setLinearVelocity(new Vec2(0,this.vel));
         }else if(-(this.obsBody.getPosition().y*Game.meterToPixel) <= 10){
-            this.obsBody.setLinearVelocity(new Vec2(0,-3));
+            this.obsBody.setLinearVelocity(new Vec2(0,-this.vel));
         }
+    }
+
+    @Override
+    public String toString(){
+        return "pickle";
+    }
+
+
+    public void remove(){
+        this.obsBody.setActive(false);
+        world.destroyBody(this.obsBody);
     }
 }

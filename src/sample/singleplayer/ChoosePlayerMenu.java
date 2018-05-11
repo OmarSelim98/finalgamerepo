@@ -4,17 +4,23 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import sample.GameMenu;
 import sample.Main;
 import sample.Player;
 
 
 public class ChoosePlayerMenu extends GameMenu{
-    private final Button singlePlayer;
+
     public Image player2Body
             ,player2Arm
             ,player1Arm
@@ -30,9 +36,17 @@ public class ChoosePlayerMenu extends GameMenu{
     Image Background = new Image("menures/menuBck2_preview.png");
     Image Single = new Image("menures/singleplayer_preview.png");
 
+
+    Label Easy = new Label("Easy");
+    Label Medium = new Label(" Medium");
+    Label Hard = new Label ("Hard");
+    HBox Diffculties;
+
+
     ImageView player = new ImageView();
     ImageView BackgroundImage = new ImageView(Background);
     ImageView SingleImage = new ImageView(Single);
+
 
     public ChoosePlayerMenu(){
         Main.ChangeScene(this.getScene());
@@ -41,37 +55,62 @@ public class ChoosePlayerMenu extends GameMenu{
         BackgroundImage.setCache(true);
         player.setImage(rick);
 
+
         Button region = new Button();
         region.setMinHeight(rick.getHeight());
         region.setMinWidth(rick.getWidth());
+        Diffculties= new HBox(Easy,Medium,Hard);
 
-        singlePlayer = new Button();
-        singlePlayer.setMinWidth(MIN_WIDTH);
-        singlePlayer.setMinHeight(MIN_HEIGHT);
-        InvisibleButtons = new VBox(50, region, singlePlayer);
+
+
+        InvisibleButtons = new VBox(50, region);
         InvisibleButtons.setAlignment(Pos.TOP_CENTER);
-        InvisibleButtons.setLayoutX(1000/2-302/2);
+        InvisibleButtons.setLayoutX(1000/2-302/2+100);
         InvisibleButtons.setLayoutY(300);
         InvisibleButtons.setOpacity(0);
 
 
-        Images = new VBox(50,player,SingleImage);
+        Images = new VBox(50,player);
         Images.setAlignment(Pos.TOP_CENTER);
-        Images.setLayoutX(1000/2-302/2);
+        Images.setLayoutX(1000/2-302/2+100);
         Images.setLayoutY(300);
+        Diffculties= new HBox(Easy,Medium,Hard);
+        Easy.setFont(Font.font("Courier New",30));
+        Medium.setFont(Font.font("Courier New",30));
+        Hard.setFont(Font.font("Courier New",30));
+        Easy.setTextFill(Color.WHITE);
+        Medium.setTextFill(Color.WHITE);
+        Hard.setTextFill(Color.WHITE);
+        Diffculties.setLayoutX(1000/2-Hard.getWidth()/2-175);
+        Diffculties.setLayoutY(Images.getLayoutY()+rick.getHeight()+60);
+        Diffculties.setSpacing(30);
+        Glow glow = new Glow();
+        glow.setLevel(40);
 
-        this.root.getChildren().addAll(BackgroundImage,Images,InvisibleButtons);
+        Easy.setEffect(glow);
+        Medium.setEffect(glow);
+        Hard.setEffect(glow);
 
-        region.setOnMouseClicked(event -> {
-            if(player.getImage()==rick){
-                player.setImage(morty);
-            }
-            else{
-                player.setImage(rick);
-            }
-        });
 
-        this.singlePlayer.setOnMouseClicked(event -> {
+        Button EasyButton = new Button();
+        Button MediumButton = new Button();
+        Button HardButton = new Button();
+        EasyButton.setMinWidth(100);
+        EasyButton.setMinHeight(40);
+
+        MediumButton.setMinWidth(120);
+        MediumButton.setMinHeight(40);
+        HardButton.setMinWidth(100);
+        HardButton.setMinHeight(40);
+
+
+
+        HBox InvisibleDiffs= new HBox(EasyButton,MediumButton,HardButton);
+        InvisibleDiffs.setLayoutX(1000/2-Hard.getWidth()/2-173);
+        InvisibleDiffs.setLayoutY(Images.getLayoutY()+rick.getHeight()+70);
+        InvisibleDiffs.setSpacing(20);
+        InvisibleDiffs.setOpacity(0);
+        EasyButton.setOnAction(e->{
             System.out.println("Button clicked");
             if(player.getImage()==rick){
                 player1Body = new Image("gameres/rickBody.png", Player.playerWidth,Player.playerHeight,false,false);
@@ -89,9 +128,66 @@ public class ChoosePlayerMenu extends GameMenu{
                 player1Name = "Morty";
                 player2Name = "Rick";
             }
-            SinglePlayerGame game = new SinglePlayerGame(this);
+            SinglePlayerGame game = new SinglePlayerGame(this,"easy");
             Main.ChangeScene(game.getScene());
         });
+        MediumButton.setOnAction(e->{
+            System.out.println("Button clicked");
+            if(player.getImage()==rick){
+                player1Body = new Image("gameres/rickBody.png", Player.playerWidth,Player.playerHeight,false,false);
+                player1Arm =  new Image("gameres/rickGun.png",Player.arm_width,Player.arm_height,false,false);
+                player2Body  = new Image("gameres/body.png", Player.playerWidth,Player.playerHeight,false,false);
+                player2Arm  = new Image("gameres/arm.png",Player.arm_width,Player.arm_height,false,false);
+                player1Name = "Rick";
+                player2Name = "Morty";
+            }
+            else {
+                player2Body = new Image("gameres/rickBody.png", Player.playerWidth,Player.playerHeight,false,false);
+                player2Arm = new Image("gameres/rickGun.png",Player.arm_width,Player.arm_height,false,false);
+                player1Body  = new Image("gameres/body.png", Player.playerWidth,Player.playerHeight,false,false);
+                player1Arm  = new Image("gameres/arm.png",Player.arm_width,Player.arm_height,false,false);
+                player1Name = "Morty";
+                player2Name = "Rick";
+            }
+            SinglePlayerGame game = new SinglePlayerGame(this,"medium");
+            Main.ChangeScene(game.getScene());
+        });
+        HardButton.setOnAction(e->{
+            System.out.println("Button clicked");
+            if(player.getImage()==rick){
+                player1Body = new Image("gameres/rickBody.png", Player.playerWidth,Player.playerHeight,false,false);
+                player1Arm =  new Image("gameres/rickGun.png",Player.arm_width,Player.arm_height,false,false);
+                player2Body  = new Image("gameres/body.png", Player.playerWidth,Player.playerHeight,false,false);
+                player2Arm  = new Image("gameres/arm.png",Player.arm_width,Player.arm_height,false,false);
+                player1Name = "Rick";
+                player2Name = "Morty";
+            }
+            else {
+                player2Body = new Image("gameres/rickBody.png", Player.playerWidth,Player.playerHeight,false,false);
+                player2Arm = new Image("gameres/rickGun.png",Player.arm_width,Player.arm_height,false,false);
+                player1Body  = new Image("gameres/body.png", Player.playerWidth,Player.playerHeight,false,false);
+                player1Arm  = new Image("gameres/arm.png",Player.arm_width,Player.arm_height,false,false);
+                player1Name = "Morty";
+                player2Name = "Rick";
+            }
+            SinglePlayerGame game = new SinglePlayerGame(this,"hard");
+            Main.ChangeScene(game.getScene());
+        });
+
+
+
+        this.root.getChildren().addAll(BackgroundImage,Images,InvisibleButtons,Diffculties,InvisibleDiffs);
+
+        region.setOnMouseClicked(event -> {
+            if(player.getImage()==rick){
+                player.setImage(morty);
+            }
+            else{
+                player.setImage(rick);
+            }
+        });
+
+
     }
 
     public Scene getScene(){

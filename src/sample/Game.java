@@ -1,5 +1,5 @@
 package sample;
-
+//TYPE : FALSE SINGLE | TRUE MULTI.
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -16,6 +16,7 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.*;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,8 +49,13 @@ public class Game{
 
     private PowerSlider powerslider;
     /*for timer*/
-    int timerCounter = 5;
+    int timerCounter;
     long lastTime;
+    long lastTimeSingle;
+
+    int score = 0;
+
+    ArrayList<Obstacle> obstArr = new ArrayList<>();
 
     AudioClip wubba = new AudioClip(this.getClass().getResource("../../audio/wubba.mp3").toString())
             ,worldisreal = new AudioClip(this.getClass().getResource("../../audio/worldisreal.mp3").toString())
@@ -84,7 +90,7 @@ public class Game{
 
 
     //Turns Stuff
-    private int player1Balls = 10
+     int player1Balls = 10
             , player2Balls = 10
             ,currentTurn = 1
             ,player1Moves = 4
@@ -92,10 +98,19 @@ public class Game{
 
     private boolean canPlay = true;
 
+    boolean type;
+    String difficulty;
+    int pickleVel;
 
+    AnimationTimer animTimer;
 
-    public Game(){
+    int obstNum = 0;
 
+    Obstacle pickle = null;
+
+    public Game(boolean type,String difficulty){
+        this.difficulty = difficulty;
+        this.type = type;
 
         Vec2 gravity = new Vec2(0,-8);
         world = new World(gravity,false);
@@ -117,11 +132,13 @@ public class Game{
         planet2.setTranslateY(150);
 
 
-
         turnLbl.setFont(Font.font("sans",22));
         turnLbl.setTextFill(Color.WHITE);
         turnLbl.setTranslateX(400);
         turnLbl.setTranslateY(10);
+        if(this.type == false){
+            turnLbl.setText("Time Remaining : "+timerCounter+"\nScore : "+score);
+        }
         root.getChildren().addAll(background,c,ground,planet1,planet2,turnLbl);
 
         this.powerslider = new PowerSlider();
@@ -133,15 +150,16 @@ public class Game{
         //Body
         Body wallBody = world.createBody(wallDef);
 
+
         new Wall(world,(-1/meterToPixel),(0/meterToPixel));// LEFT WALL
         new Wall(world,(1001/meterToPixel),(0/meterToPixel));// Right WALL
         new Wall(world,(300/meterToPixel),(0/meterToPixel));// Movement Boundary WALL left
-        new Wall(world,(600/meterToPixel),(0/meterToPixel));// Movement Boundary WALL Right
+        if(this.type ==true) {
+            new Wall(world, (600 / meterToPixel), (0 / meterToPixel));// Movement Boundary WALL Right
+        }
 
 
         /*Obstacle*/
-        obst = new Obstacle(world,400,250);
-        root.getChildren().add(obst.getObstacleImageView());
 
         //player1.playerFixtureDef.filter.groupIndex=7;
         //System.out.println(player1.playerFixtureDef.filter.groupIndex);
@@ -160,7 +178,10 @@ public class Game{
         //wallFixture.isSensor;
 
 
-
+        if(this.type == true)
+            this.timerCounter = 5;
+        else
+            this.timerCounter = 30;
 
         c.setWidth(1000);
         c.setHeight(1000);
@@ -168,8 +189,8 @@ public class Game{
         gc = c.getGraphicsContext2D();
 
 
-
-        startTimer(); // Here we start the turns timer.
+        if(this.type == true)
+            startTimer(); // Here we start the turns timer.
 
         //Action Handlers
         handlePlayerMovement();
@@ -183,22 +204,47 @@ public class Game{
         handleMouseRelease();
 
         lastTime = System.nanoTime();
+        if(this.type == false)
+            lastTimeSingle = System.nanoTime();
     }
 
 
     public void gameLoop() {
-        new AnimationTimer(){
+        this.animTimer = new AnimationTimer(){
             int cycleCount = 0;
 
             //used to calculate timerCounter
             @Override
             public void handle(long now) {
                 drawFrame();
-                changeLabel();
-                /*For Timer Counter*/
-                if(timerCounter < 0){
-                    timerCounter = 5;
+
+                //DETERMINE TYPE OF GAME < DEPENDING ON THAT USE TIMER COUNTER TO DECIDE SOME LOGIC.
+                if(type == true) {
+                    changeLabel();
+                    /*For Timer Counter*/
+                    if (timerCounter < 0) {
+                        timerCounter = 5;
+                    }
+                    if ((System.nanoTime() - lastTime) >= 1000000000) {
+                        timerCounter--;
+                        System.out.println(timerCounter + 1);
+                        lastTime = System.nanoTime();
+                    }
+                }else {
+                    updateSingleData();
+                    if (timerCounter < 0) {
+                        //END GAME SAVE SCORE
+                        timerCounter = 30;
+                        animTimer.stop();
+                        Main.ChangeScene(new GameMenu().getScene(),"Morty");
+
+                    }else if((System.nanoTime() - lastTime) >= 1000000000) {
+                        timerCounter--;
+                        System.out.println(timerCounter + 1);
+                        lastTime = System.nanoTime();
+                    }
                 }
+
                 if((System.nanoTime()-lastTime) >= 1000000000){
                     timerCounter--;
                     System.out.println(timerCounter+1);
@@ -212,9 +258,11 @@ public class Game{
                             root.getChildren().removeAll(ball.imgView);
                             world.destroyBody(ball.ballBody);
                             ball=null;
-                            endTimer();
-                            changeTurn();
-                            startTimer();
+                            if(type == true) {
+                                endTimer();
+                                changeTurn();
+                                startTimer();
+                            }
                         }
                     } else {
                         root.getChildren().removeAll(ball.imgView);
@@ -223,7 +271,10 @@ public class Game{
                 }
 
                 healthbar1.UpdateHealthbar();
-                healthbar2.UpdateHealthbar();
+
+                if(type == true) {
+                    healthbar2.UpdateHealthbar();
+                }
 
                 if(planetsAnimationAngle >= 360){
                     planetsAnimationAngle = 0;
@@ -233,7 +284,15 @@ public class Game{
 
                 planet1.setTranslateX(100+(Math.sin(planetsAnimationAngle)*25));
                 planet2.setTranslateX(670-(Math.sin(planetsAnimationAngle)*25));
-                obst.updateObstacle();
+
+                if(type == false) {
+                    /*FOR SINGLE PLAYER UPDATE OBSTACLESS*/
+                    if (pickle != null) {
+                        System.out.println("update");
+                        pickle.updateObstacle();
+                    }
+                }
+
 /*                    for(Ball ball : ballsList){
                       if(ball!= null){
                           if(ball.ballBody.isActive())
@@ -267,11 +326,40 @@ public class Game{
                     player2.update();
                     player2.update_arm();
                 }
+                if(type == false) {
+                    int x = rnd.nextInt(900);
+                    int y = rnd.nextInt(500);
+                    if(difficulty.equals("easy")){
+                        pickleVel = rnd.nextInt(5);
+                        if (pickleVel < 1) {
+                            pickleVel = 1;
+                        }
+                    }else if(difficulty.equals("medium")){
+                        pickleVel = rnd.nextInt(10);
+                        if (pickleVel < 7) {
+                            pickleVel = 7;
+                        }
+                    }else  if(difficulty.equals("hard")){
+                        pickleVel = rnd.nextInt(17);
+                        if (pickleVel < 13) {
+                            pickleVel = 13;
+                        }
+                    }
 
+                    if (x < 400) {
+                        x = 400;
+                    }
+                    if (y < 20) {
+                        y = 20;
+                    }
 
+                    if (pickle == null)
+                        initiateObstacle(x, y, pickleVel);//TEST
+                }
                    // System.out.println(sceneAngle);
             }
-        }.start();
+        };
+        this.animTimer.start();
     }
 
     private void drawFrame() {
@@ -300,6 +388,9 @@ public class Game{
                 impPower = 30;
             }
             if(canPlay) {
+                if(ball != null){
+                    destroyBall();
+                }
                 if (this.currentTurn == 1) {
                     float ballX = (float) (player1.armView.getTranslateX() - (player1.getArmHeight() * Math.sin(Math.toRadians(sceneAngle))) + 10);
                     float ballY = (float) ((player1.armView.getTranslateY()) + (player1.getArmHeight() * Math.cos(Math.toRadians(sceneAngle))) + 10);
@@ -311,7 +402,6 @@ public class Game{
                     ball.ballBody.setUserData(ball);
                     root.getChildren().add(ball.imgView);
                     int audiornd = rnd.nextInt(3);
-                    System.out.println(audiornd);
                     if(audiornd == 0){
                         //woah.play();
                     }else if(audiornd == 1){
@@ -327,7 +417,7 @@ public class Game{
                     ball.ballBody.setUserData(ball);
                     root.getChildren().add(ball.imgView);
                     int audiornd = rnd.nextInt(3);
-                    System.out.println(audiornd);
+                    //System.out.println(audiornd);
                     if(audiornd == 0){
                         wubba.play();
                     }else if(audiornd == 1){
@@ -335,7 +425,9 @@ public class Game{
                     }
                 }
             }
-            canPlay =false;
+            if(type ==true) {
+                canPlay = false;
+            }
             this.powerslider.updatePowerSlider(0);
             this.root.getChildren().remove(this.powerslider);
         });
@@ -431,24 +523,32 @@ public class Game{
      * Check Turn , Then Change it.
      * */
     void changeTurn(){
-        if(this.currentTurn == 1){
-            this.currentTurn = 2;
+        if(this.type == true) {
+            if (this.currentTurn == 1) {
+                this.currentTurn = 2;
 
 
-        }
-        else if(this.currentTurn ==2){
+            } else if (this.currentTurn == 2) {
                 this.currentTurn = 1;
+            }
+            this.player1Moves = 5;
+            this.player2Moves = 5;
+            canPlay = true;
         }
-        this.player1Moves = 5;
-        this.player2Moves =5;
-        canPlay = true;
     }
     void changeLabel(){
+
         if(this.currentTurn == 1){
             this.turnLbl.setText(player1Name + "'s Turn! | "+timerCounter);
         }else if(this.currentTurn ==2){
             this.turnLbl.setText(player2Name + "'s Turn! | "+timerCounter);
         }
+    }
+    /**
+     * Updates score , time remaining.
+     * */
+    void updateSingleData(){
+        turnLbl.setText("Time Remaining : "+timerCounter+"\nScore : "+score);
     }
     /**
      * Decerment the number of balls , depending on the current turn.
@@ -499,37 +599,41 @@ public class Game{
     }
 
     /**
-     * Initiate the task timer . Change the turn after 5 seconds.
+     * If game is multi , Initiate the task timer . Change the turn after 5 seconds.
      */
     public void startTimer(){
+        if(type == true) {
 
-        turnTimer = new Timer();
+            turnTimer = new Timer();
 
-        turnTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                endTimer();
-                if(ball != null)
-                    ball.ballBody.setActive(false);
+            turnTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    endTimer();
+                    if (ball != null)
+                        ball.ballBody.setActive(false);
 
-                changeTurn();
+                    changeTurn();
 
-                startTimer();
+                    startTimer();
 
-                this.cancel();
-            }
-        },5000);
+                    this.cancel();
+                }
+            }, 5000);
 
-        System.out.println("Timer Started!");
+            System.out.println("Timer Started!");
+        }
     }
     /**.
-     * Cancel the current task
+     * If game is multi , Cancel the current task
      * */
     public void endTimer(){
-        this.turnTimer.cancel();
-        this.turnTimer.purge();
-        timerCounter = 5;
-        lastTime = System.nanoTime();
+        if(type ==true) {
+            this.turnTimer.cancel();
+            this.turnTimer.purge();
+            timerCounter = 5;
+            lastTime = System.nanoTime();
+        }
         System.out.println("Timer Ended");
     }
 
@@ -540,5 +644,19 @@ public class Game{
         wubba.stop();
         worldisreal.stop();
         woah.stop();
+    }
+    public void destroyBall(){
+        root.getChildren().removeAll(ball.imgView);
+        ball.ballBody.setActive(false);
+        world.destroyBody(ball.ballBody);
+        ball=null;
+    }
+
+
+    public void initiateObstacle(int x, int y, int vel){
+        //if(this.pickle == null) {
+            this.pickle = new Obstacle(world, x, y,vel);
+            root.getChildren().add(this.pickle.getObstacleImageView());
+       // }
     }
 }

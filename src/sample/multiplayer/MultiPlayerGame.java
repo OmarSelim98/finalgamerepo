@@ -9,7 +9,7 @@ public class MultiPlayerGame extends Game {
 
 
     public MultiPlayerGame(){
-        super();
+        super(true,"");
         player1Body = new Image("gameres/body.png");
         player1Arm = new Image("gameres/arm.png");
         player2Body = new Image("gameres/rickBody.png");

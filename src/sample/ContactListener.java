@@ -9,6 +9,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import javax.swing.text.html.Option;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class ContactListener implements org.jbox2d.callbacks.ContactListener{
@@ -16,47 +17,61 @@ public class ContactListener implements org.jbox2d.callbacks.ContactListener{
     public static final int DAMAGE = 20;
     private Game game;
     private Player player1,player2;
+    private Obstacle pickle;
 
     public ContactListener(Game game){
         this.game = game;
         this.player1 = game.player1;
         this.player2 = game.player2;
-
     }
 
     @Override
     public void beginContact(Contact contact) {
         try {
             if (contact.isEnabled()) {
-                //System.out.println("collision yabaaaaaaaa");
-                System.out.println(contact.m_fixtureB.m_userData.toString()+" | "+contact.m_fixtureB.m_userData.toString());
-                if (contact.m_fixtureB.m_userData.toString() == contact.m_fixtureA.m_userData.toString()) {
-                    System.out.println(contact.m_fixtureB.m_userData.toString()+" | "+contact.m_fixtureB.m_userData.toString());
-                    game.endTimer();
-                    contact.m_fixtureB.getBody().setActive(false);
-                    contact.m_fixtureB.destroy();
-                    //Here we check the current turns , update health , apply impulse
-                    if(game.getCurrentTurn() == 1) {
-                        game.player2.inflictDamage(DAMAGE);
-                        contact.m_fixtureA.getBody().applyLinearImpulse(new Vec2(DAMAGE,0),contact.m_manifold.localPoint);
-                    }else if(game.getCurrentTurn() == 2){
-                        game.player1.inflictDamage(DAMAGE);
-                        contact.m_fixtureA.getBody().applyLinearImpulse(new Vec2(-DAMAGE,0),contact.m_manifold.localPoint);
-                        game.woah.play();
-                    }
-                    game.decrementBalls();
-                    game.changeTurn();
-                    game.startTimer();
-                    if(game.player1.getHealth() <= 0 ){
+                if(game.type == true) {
+                    //System.out.println("collision yabaaaaaaaa");
+                    System.out.println(contact.m_fixtureA.m_userData.toString() + " | " + contact.m_fixtureB.m_userData.toString());
+                    if (contact.m_fixtureB.m_userData.toString() == contact.m_fixtureA.m_userData.toString()) {
+                        System.out.println(contact.m_fixtureB.m_userData.toString() + " | " + contact.m_fixtureB.m_userData.toString());
                         game.endTimer();
-                        Main.ChangeScene(new GameMenu().getScene(),"Morty");
-                        game.stopAudio();
-                    }else if(game.player2.getHealth() <= 0){
-                        game.endTimer();
-                        Main.ChangeScene(new GameMenu().getScene(),"Rick");
-                        game.stopAudio();
+                        contact.m_fixtureB.getBody().setActive(false);
+                        contact.m_fixtureB.destroy();
+                        //Here we check the current turns , update health , apply impulse
+                        if (game.getCurrentTurn() == 1) {
+                            game.player2.inflictDamage(DAMAGE);
+                            contact.m_fixtureA.getBody().applyLinearImpulse(new Vec2(DAMAGE, 0), contact.m_manifold.localPoint);
+                        } else if (game.getCurrentTurn() == 2) {
+                            game.player1.inflictDamage(DAMAGE);
+                            contact.m_fixtureA.getBody().applyLinearImpulse(new Vec2(-DAMAGE, 0), contact.m_manifold.localPoint);
+                            game.woah.play();
+                        }
+                        game.decrementBalls();
+                        game.changeTurn();
+                        game.startTimer();
+                        if (game.player1.getHealth() <= 0) {
+                            game.endTimer();
+                            Main.ChangeScene(new GameMenu().getScene(), "Morty");
+                            this.game.animTimer.stop();
+                            game.stopAudio();
+                        } else if (game.player2.getHealth() <= 0) {
+                            game.endTimer();
+                            Main.ChangeScene(new GameMenu().getScene(), "Rick");
+                            game.stopAudio();
+                        }
+                        //contact.getFixtureA().getUserData().equals()
                     }
-                    //contact.getFixtureA().getUserData().equals()
+                }else {
+                    if (contact.m_fixtureA.m_userData.toString().equals("pickle") || contact.m_fixtureB.m_userData.toString().equals("pickle")) {
+                        //this.pickle = (Obstacle) contact.m_fixtureA.m_userData;
+                        game.score++;
+                        this.game.root.getChildren().remove(game.pickle.getObstacleImageView());
+                        game.pickle.remove();
+                        game.pickle = null;
+                        this.game.destroyBall();
+                        this.game.player1Moves += 1;
+                        //game.initiateObstacle(700,4);
+                    }
                 }
             }
         }
